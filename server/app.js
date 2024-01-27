@@ -6,6 +6,7 @@ const client = new textToSpeech.TextToSpeechClient();
 
 
 const cors = require("cors");
+const path = require('path');
 
 async function generateMP3(text) {
   const request = {
@@ -19,16 +20,14 @@ async function generateMP3(text) {
   await writeFile("output.mp3", response.audioContent, "binary");
 }
 
-// const text = "My 7 year old";
-// quickStart(text);
-
 const app = express();
 const port = 3000;
 app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  const mp3Path = path.join(__dirname, 'output.mp3');
+  res.sendFile(mp3Path, { mimetype: 'audio/mpeg', lastModified: false, headers: false });
 });
 
 app.post("/voice", (req, res) => {
