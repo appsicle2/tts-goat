@@ -1,12 +1,15 @@
-const textToSpeech = require("@google-cloud/text-to-speech");
-const express = require("express");
-const fs = require("fs");
-const util = require("util");
-const client = new textToSpeech.TextToSpeechClient();
+import { TextToSpeechClient } from "@google-cloud/text-to-speech";
+import express from "express";
+import { json } from "express";
+import { writeFile as _writeFile } from "fs";
+import { promisify } from "util";
+import cors from "cors";
+import { join } from "path";
+import openAIService from "./openaiService.js";
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-
-const cors = require("cors");
-const path = require('path');
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 async function generateMP3(text) {
   const request = {
@@ -26,8 +29,24 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  const mp3Path = path.join(__dirname, 'output.mp3');
-  res.sendFile(mp3Path, { mimetype: 'audio/mpeg', lastModified: false, headers: false });
+  const mp3Path = join(__dirname, "output.mp3");
+  res.sendFile(mp3Path, {
+    mimetype: "audio/mpeg",
+    lastModified: false,
+    headers: false,
+  });
+});
+
+app.get("/openai", async (req, res) => {
+  const mp3Path = join(__dirname, "openai.mp3");
+  const body = await openAIService.getAudio(mp3Path);
+  console.log(body);
+  res.send(body);
+  // res.sendFile(mp3Path, {
+  //   mimetype: "audio/mpeg",
+  //   lastModified: false,
+  //   headers: false,
+  // });
 });
 
 app.post("/voice", (req, res) => {
