@@ -3,6 +3,10 @@ const express = require("express");
 const fs = require("fs");
 const util = require("util");
 const client = new textToSpeech.TextToSpeechClient();
+require('dotenv').config()
+
+const openai_key = process.env.OPEN_AI_KEY;
+
 const cors = require("cors");
 
 async function generateMP3(text) {
