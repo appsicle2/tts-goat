@@ -17,7 +17,7 @@ const streamToFile = async (stream, path) =>
     });
   });
 
-const getAudio = async (speechFile) => {
+  export const getAudio = async (speechFile) => {
   const mp3 = await openai.audio.speech.create({
     model: "tts-1",
     voice: "alloy",
@@ -27,4 +27,13 @@ const getAudio = async (speechFile) => {
   // await streamToFile(mp3.body, speechFile);
 };
 
-export default getAudio;
+export const getAudioFile = async (speechFile) => {
+  const mp3 = await openai.audio.speech.create({
+    model: "tts-1",
+    voice: "alloy",
+    input: "Today is a wonderful day to build something people love!",
+  });
+  const buffer = Buffer.from(await mp3.arrayBuffer());
+  await fs.promises.writeFile(speechFile, buffer);
+}
+
