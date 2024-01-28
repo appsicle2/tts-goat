@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import ProgressSection from "./ProgressSection";
 import axios from "axios";
 import "./App.css";
 
 function App() {
   const [message, setMessage] = useState("");
+  const [url, setUrl] = useState("");
   const [audio, setAudio] = useState(null);
   const [isPaused, setIsPaused] = useState(true);
+  const audioRef = useRef(null);
 
   const pageStyle = {
     display: "flex",
@@ -33,12 +35,16 @@ function App() {
   };
 
   const submit = async (text) => {
-    const response = await axios.get("http://localhost:3000/", {
-      responseType: "blob",
-    });
-    const blobUrl = URL.createObjectURL(new Blob([response.data]));
-    const audioResponse = new Audio(blobUrl);
-    setAudio(audioResponse);
+    // const response = await axios.get("http://localhost:3000/", {
+    //   responseType: "arraybuffer",
+    // });
+    // const blobUrl = URL.createObjectURL(new Blob([response.data]));
+    setUrl("http://localhost:3000/");
+    audioRef.current.load();
+    // const audioResponse = new Audio(blobUrl);
+    // setAudio(audioResponse);
+    // setUrl('http://localhost:3000/');
+    // console.log(url);
   };
 
   const togglePlayPauseButton = () => {
@@ -78,6 +84,10 @@ function App() {
         onChange={(e) => setMessage(e.target.value)}
         style={textAreaStyle}
       />
+      <audio controls ref={audioRef}>
+        <source src={url} type="audio/mpeg" />
+        Your browser does not support the audio tag.
+      </audio>
     </div>
   );
 }
