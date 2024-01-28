@@ -1,14 +1,13 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import ProgressSection from "./ProgressSection";
-import axios from "axios";
 import "./App.css";
 
 function App() {
   const [message, setMessage] = useState("");
-  const [url, setUrl] = useState("");
   const [audio, setAudio] = useState(null);
+  const [audio2, setAudio2] = useState(null);
   const [isPaused, setIsPaused] = useState(true);
-  const audioRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const pageStyle = {
     display: "flex",
@@ -34,23 +33,57 @@ function App() {
     resize: "none",
   };
 
-  const submit = async (text) => {
-    // const response = await axios.get("http://localhost:3000/", {
-    //   responseType: "arraybuffer",
-    // });
-    // const blobUrl = URL.createObjectURL(new Blob([response.data]));
-    setUrl("http://localhost:3000/stream");
-    audioRef.current.load();
-    // const audioResponse = new Audio(blobUrl);
-    // setAudio(audioResponse);
-    // setUrl('http://localhost:3000/');
-    // console.log(url);
+  const submit = (text) => {
+    setAudio(null); // reset Audio
+    setIsLoading(true);
+
+    fetch('http://localhost:3000/stream')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const stream = response.body;
+        const buffers = [];
+
+        // Process the stream
+        const processStream = ({ done, value }) => {
+          if (done) {
+            setIsLoading((previousState) => { return false; });
+            console.log('done processing blobs');
+            return;
+          }
+
+          const arrayBuffer = value.buffer.slice(0);
+          console.log('buffer being processed: ', arrayBuffer);
+          buffers.push(arrayBuffer);
+
+          // Create a blob from the arrayBuffer
+          const blob = new Blob(buffers, { type: 'audio/mp3' });
+
+          // Create a blob URL
+          const blobUrl = URL.createObjectURL(blob);
+
+          // Create an Audio object with the blob URL
+          const incomingAudio = new Audio(blobUrl);
+
+          if (buffers.length === 1) {
+            console.log('setting audio1 ', blobUrl);
+            setAudio((_prevState) => { return incomingAudio });
+          } else {
+            console.log('setting audio 2 ', blobUrl);
+            setAudio2((_prevState) => { return incomingAudio; });
+          }
+
+          reader.read().then(processStream);
+        };
+
+        const reader = stream.getReader();
+        reader.read().then(processStream);
+      })
   };
 
   const togglePlayPauseButton = () => {
-    if (audio === null) {
-      return;
-    }
     if (audio.paused) {
       audio.play();
       setIsPaused(false);
@@ -62,6 +95,28 @@ function App() {
   };
 
   const audioEnded = () => {
+    while (isLoading || audio.src !== audio2.src) {
+      if (audio.src !== audio2.src) {
+        console.log(audio.duration);
+        console.log(audio.currentTime);
+        console.log(audio.src);
+
+        const currentTime = audio.currentTime;
+        const newSrc = audio2.src;
+        audio.src = newSrc;
+        audio.load();
+        audio.currentTime = currentTime;
+
+        console.log(audio.src);
+        console.log(audio.duration);
+        console.log(audio.currentTime);
+        togglePlayPauseButton();
+        return;
+      }
+    }
+    console.log('real end');
+    console.log(audio.src);
+    console.log(audio2.src);
     setIsPaused(true);
   };
 
@@ -84,10 +139,6 @@ function App() {
         onChange={(e) => setMessage(e.target.value)}
         style={textAreaStyle}
       />
-      <audio controls ref={audioRef}>
-        <source src={url} type="audio/mpeg" />
-        Your browser does not support the audio tag.
-      </audio>
     </div>
   );
 }

@@ -36,19 +36,29 @@ app.get("/file", async (req, res) => {
 });
 
 app.get("/stream", async (req, res) => {
-  const response = await openai.audio.speech.create({
-    model: "tts-1",
-    voice: "alloy",
-    input:
-      "The TTS model generally follows the Whisper model in terms of language support. Whisper supports the following languages and performs well despite the current voices being optimized for English:Afrikaans, Arabic, Armenian, Azerbaijani, Belarusian, Bosnian, Bulgarian, Catalan, Chinese, Croatian, Czech, Danish, Dutch, English, Estonian, Finnish, French, Galician, German, Greek, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Italian, Japanese, Kannada, Kazakh, Korean, Latvian, Lithuanian, Macedonian, Malay, Marathi, Maori, Nepali, Norwegian, Persian, Polish, Portuguese, Romanian, Russian, Serbian, Slovak, Slovenian, Spanish, Swahili, Swedish, Tagalog, Tamil, Thai, Turkish, Ukrainian, Urdu, Vietnamese, and Welsh.",
-    response_format: "opus",
-  });
-  let stream = response.body;
-  stream.pipe(res);
-  stream.on("error", (err) => {
-    res.status(500).send(`error: ${err.message}`);
-  });
-  stream.on("end", res.end);
+  try {
+    res.setHeader('Content-Type', 'audio/mpeg');
+    res.setHeader('Content-Disposition', 'attachment; filename=generated_audio.mp3');
+
+    const response = await openai.audio.speech.create({
+      model: "tts-1",
+      voice: "alloy",
+      input:
+        "The TTS model generally follows the Whisper model in terms of language support. Whisper supports the following languages and performs well despite the current voices being optimized for English:Afrikaans, Arabic, Armenian, Azerbaijani, Belarusian, Bosnian, Bulgarian, Catalan, Chinese, Croatian, Czech, Danish, Dutch, English, Estonian, Finnish, French, Galician, German, Greek, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Italian, Japanese, Kannada, Kazakh, Korean, Latvian, Lithuanian, Macedonian, Malay, Marathi, Maori, Nepali, Norwegian, Persian, Polish, Portuguese, Romanian, Russian, Serbian, Slovak, Slovenian, Spanish, Swahili, Swedish, Tagalog, Tamil, Thai, Turkish, Ukrainian, Urdu, Vietnamese, and Welsh.",
+      response_format: "mp3",
+    });
+    let stream = response.body;
+    stream.pipe(res);
+    stream.on("error", (err) => {
+      res.status(500).send(`error: ${err.message}`);
+    });
+    stream.on("end", () => {
+      res.end();
+    })
+  } catch (error) {
+    // Handle OpenAI API request error
+    res.status(500).send(`Error generating TTS audio: ${error.message}`);
+  }
 });
 
 app.listen(port, () => {
