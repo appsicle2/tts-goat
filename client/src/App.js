@@ -39,7 +39,7 @@ function App() {
     //   responseType: "arraybuffer",
     // });
     // const blobUrl = URL.createObjectURL(new Blob([response.data]));
-    setUrl("http://localhost:3000/");
+    setUrl("http://localhost:3000/stream");
     audioRef.current.load();
     // const audioResponse = new Audio(blobUrl);
     // setAudio(audioResponse);
