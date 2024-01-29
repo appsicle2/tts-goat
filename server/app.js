@@ -10,10 +10,11 @@ import fs from "fs";
 import "dotenv/config";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const DEBUG = process.env.DEBUG;
 
-const speechFile = join(__dirname, "openai.mp3");
-const SKIP_GENERATION = false;
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const speechFile = DEBUG ? join(__dirname, "openai.mp3") : "/tmp/openai.mp3";
+const SKIP_GENERATION = DEBUG;
 
 const app = express();
 const port = 3000;
@@ -70,6 +71,7 @@ app.get("/", (req, res) => {
   res.send('hello world');
 })
 
+// currently deployed on cyclic.sh
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });

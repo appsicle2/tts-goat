@@ -35,7 +35,7 @@ function App() {
     if (!text) {
       return;
     }
-    const response = await axios.post('http://localhost:3000/file', { text }, { responseType: "arraybuffer" })
+    const response = await axios.post('https://worried-shoe-moth.cyclic.app/file', { text }, { responseType: "arraybuffer" })
     const blob = new Blob([response.data], { type: "audio/mp3" })
     const downloadUrl = window.URL.createObjectURL(blob);
     const audioResponse = new Audio(downloadUrl);
