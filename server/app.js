@@ -66,6 +66,10 @@ app.get("/stream", async (req, res) => {
   }
 });
 
+app.get("/", (req, res) => {
+  res.send('hello world');
+})
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
