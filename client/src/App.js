@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import ProgressSection from "../draft/ProgressSection";
 import axios from 'axios';
 import "./App.css";
 
@@ -37,7 +36,6 @@ function App() {
       return;
     }
     const response = await axios.post('http://localhost:3000/file', { text }, { responseType: "arraybuffer" })
-    console.log(response);
     const blob = new Blob([response.data], { type: "audio/mp3" })
     const downloadUrl = window.URL.createObjectURL(blob);
     const audioResponse = new Audio(downloadUrl);
